@@ -20,5 +20,16 @@ object ZhTr {
         m
     }
 
-    fun translate(en: String): String? = MAP[en]
+    fun translate(en: String): String? {
+        MAP[en]?.let { return it }
+        // Texts built with $ interpolations arrive already interpolated, so they can
+        // never hit the literal table above; match them against the template skeletons
+        // in ZhTrTemplates (most specific first) and fill the Chinese template with
+        // the captured values.
+        for (t in ZH_TEMPLATES) {
+            val caps = t.match(en) ?: continue
+            return t.render(caps)
+        }
+        return null
+    }
 }
